@@ -1,6 +1,13 @@
 use axum::{extract::Path, response::Html, routing::get, Router};
-use minijinja::render;
+use minijinja::{path_loader, context, render, Environment};
+use once_cell::sync::Lazy;
 use serde::Serialize;
+
+static ENV: Lazy<Environment<'static>> = Lazy::new(|| {
+    let mut env = Environment::new();
+    env.set_loader(path_loader("templates"));
+    env
+});
 
 #[derive(Debug, Serialize)]
 struct Item {
@@ -67,6 +74,10 @@ async fn main() {
         .route(
             "/topic/:key",
             get(get_topic),
+        )
+        .route(
+            "/about",
+            get(about),
         );
 
     // run it with hyper on localhost:3000
@@ -97,5 +108,12 @@ async fn get_topic(Path(topic): Path<String>) -> Html<String> {
         items: item_example,
     };
     let r = render!(TOPIC_TEMPLATE, topic => topic_example );
+    Html(r)
+}
+
+async fn about () -> Html<String> {
+    let tmpl = ENV.get_template("about.html").unwrap();
+    let ctx = context!(name => "World");
+    let r = tmpl.render(ctx).unwrap();
     Html(r)
 }
