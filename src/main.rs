@@ -80,8 +80,8 @@ async fn main() {
             get(about),
         )
         .route(
-          "/info",
-          get(get_info),
+            "/info",
+            get(get_info),
         );
 
     // run it with hyper on localhost:3000
@@ -123,5 +123,5 @@ async fn about () -> Html<String> {
 }
 
 async fn get_info() -> Html<&'static str> {
-  Html("<h2>MORE INFO COMING SOON!")
+    Html("<h2>MORE INFO COMING SOON!")
 }
