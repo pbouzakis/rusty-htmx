@@ -78,6 +78,10 @@ async fn main() {
         .route(
             "/about",
             get(about),
+        )
+        .route(
+          "/info",
+          get(get_info),
         );
 
     // run it with hyper on localhost:3000
@@ -116,4 +120,8 @@ async fn about () -> Html<String> {
     let ctx = context!(name => "World");
     let r = tmpl.render(ctx).unwrap();
     Html(r)
+}
+
+async fn get_info() -> Html<&'static str> {
+  Html("<h2>MORE INFO COMING SOON!")
 }
