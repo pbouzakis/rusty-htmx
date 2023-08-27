@@ -1,0 +1,18 @@
+{
+  "assets/favicon.svg": {
+    "file": "assets/favicon.53c18623.svg",
+    "src": "assets/favicon.svg"
+  },
+  "layout.html": {
+    "file": "assets/layout.4ebe49f9.js",
+    "src": "layout.html",
+    "isEntry": true,
+    "css": [
+      "assets/layout.8aa3b765.css"
+    ]
+  },
+  "layout.css": {
+    "file": "assets/layout.8aa3b765.css",
+    "src": "layout.css"
+  }
+}
