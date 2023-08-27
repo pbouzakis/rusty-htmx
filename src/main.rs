@@ -1,7 +1,12 @@
-use axum::{extract::Path, response::Html, routing::get, Router};
+use axum::{
+  response::Html, 
+  routing::get, 
+  Router,
+};
 use minijinja::{path_loader, context, Environment};
 use once_cell::sync::Lazy;
 use serde::Serialize;
+use tower_http::services::ServeDir;
 
 static ENV: Lazy<Environment<'static>> = Lazy::new(|| {
     let mut env = Environment::new();
@@ -19,9 +24,14 @@ struct Link {
 async fn main() {
     // build our application with a single route
     let app = Router::new()
+        .nest_service("/assets", ServeDir::new("templates/_CLIENT_/assets"))
         .route(
             "/",
             get(home),
+        )
+        .route(
+          "/styled",
+          get(styled),
         )
         .route(
             "/about",
@@ -67,6 +77,13 @@ async fn about() -> Html<String> {
     Html(r)
 }
 
+async fn styled() -> Html<String> {
+    let tmpl = ENV.get_template("styled.html").unwrap();
+    let ctx = context!();
+    let r = tmpl.render(ctx).unwrap();
+    Html(r)
+}
+
 async fn get_info() -> Html<&'static str> {
-    Html("<h2>MORE INFO COMING SOON!")
+    Html("<div><img src=\"https://files.adrianistan.eu/htmx2.jpg\" /></div>")
 }
