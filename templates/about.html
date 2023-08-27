@@ -1,16 +1,14 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h2>About</h2>
-  Hello {{ name }}!
-
-  <button style="display: block; margin-top: 20px;"
-    hx-get="/info"
-    hx-trigger="click"
-    hx-target="#content"
-    hx-swap="outerHTML"
-  >
-      Click Me!
-  </button>
-
-  <div id="content"></div>
+  <h2>Page: {{ name }}</h2>
+  <div id="content">
+    <button style="display: block; margin-top: 20px;"
+      hx-get="/info"
+      hx-trigger="click"
+      hx-target="#content"
+      hx-swap="outerHTML"
+    >
+        Click to learn more!
+    </button>
+  </div>  
 {% endblock %}
