@@ -42,7 +42,7 @@ Originially designed for the frontend, however, with the foundation of this POC 
 
 ### Reloading
 A baseline for modern web development is the ability to automatically reload the server and client on changes of the source code.
-On the client, this should also include hot reloading where applicable.
+On the client, this should also include live reloading where applicable.
 
 #### cargo-watch
 This should allow us to restart our axum web server:
@@ -50,5 +50,6 @@ This should allow us to restart our axum web server:
 `cargo watch -x run`
 
 
-
+#### tower-livereload
+This crate should allow us to live reload the browser so we don't need to manually refresh after the server reloads.
   

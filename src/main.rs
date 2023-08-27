@@ -84,8 +84,11 @@ async fn main() {
             get(get_info),
         );
 
-    // run it with hyper on localhost:3000
-    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
+    #[cfg(debug_assertions)]
+    let app = app.layer(tower_livereload::LiveReloadLayer::new());        
+
+    // run it with hyper
+    axum::Server::bind(&"127.0.0.1:3000".parse().unwrap())
         .serve(app.into_make_service())
         .await
         .unwrap();
