@@ -60,7 +60,7 @@ async fn home() -> Html<String> {
     Html(r)
 }
 
-async fn about () -> Html<String> {
+async fn about() -> Html<String> {
     let tmpl = ENV.get_template("about.html").unwrap();
     let ctx = context!(name => "About");
     let r = tmpl.render(ctx).unwrap();
