@@ -15,7 +15,7 @@
           
           {% for product in catalog %}
           <div class="w-6/12 md:w-4/12 lg:w-3/12">
-            <div class="listing-item">
+            <div class="listing-item mb-10">
               <div class="xt-media-container bg-gray-200 pb-[75%]">
                 <img class="xt-media object-cover" src="{{ product.image_src }}" loading="lazy" alt="" />
               </div>
@@ -24,10 +24,16 @@
                 <div class="-mt-2 text-sm font-medium">{{ product.price }}</div>
               </div>
               <div class="flex justify-center">
-                <button class="xt-button text-center mb-10 py-2.5 px-3.5 text-sm rounded-md font-medium leading-snug tracking-wider uppercase text-gray-900 bg-gray-100 transition hover:bg-gray-200 active:bg-gray-300 on:bg-gray-200 group">
+                <button 
+                  class="xt-button py-2.5 px-3.5 text-sm rounded-md font-medium leading-snug tracking-wider uppercase text-gray-900 bg-gray-100 transition hover:bg-gray-200 active:bg-gray-300 on:bg-gray-200 group"
+                  hx-post="/shop/cart"
+                  hx-vals='{"sku": "{{ product.slug }}"}'
+                  hx-target="next .msg"
+                >
                   Add to Cart
-                </button>     
+                </button>
               </div>     
+              <div class="text-center msg"></div>     
             </div>
           </div>
           {% endfor %}

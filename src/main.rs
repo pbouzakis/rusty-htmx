@@ -1,6 +1,6 @@
 use axum::{
   response::Html, 
-  routing::get, 
+  routing::{get, post},
   Router,
 };
 use minijinja::{path_loader, context, Environment};
@@ -41,6 +41,10 @@ async fn main() {
             "/shop",
             get(shop),
         )        
+        .route(
+            "/shop/cart",
+            post(add_to_cart),
+        )           
         .route(
             "/about",
             get(about),
@@ -91,6 +95,20 @@ async fn shop() -> Html<String> {
     let ctx = context!(catalog => catalog);
     let r = tmpl.render(ctx).unwrap(); 
     Html(r)   
+}
+
+static mut COUNT: i32 = 0;
+unsafe fn update_cart() -> &'static i32 {
+    COUNT += 1;
+    &COUNT
+}
+
+async fn add_to_cart() -> Html<String> {
+    let count = unsafe { 
+        update_cart()
+    };
+    let response = format!("<div>Added! Cart count: {}</div>", count);
+    Html(response)
 }
 
 async fn styled() -> Html<String> {
