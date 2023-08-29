@@ -26,7 +26,10 @@ struct Link {
 
 #[tokio::main]
 async fn main() {
-    // build our application with a single route
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::DEBUG)
+        .init();
+
     let app = Router::new()
         .nest_service("/assets", ServeDir::new("templates/_CLIENT_/assets"))
         .nest_service("/images", ServeDir::new("client/images"))

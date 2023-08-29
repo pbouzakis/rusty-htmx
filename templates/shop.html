@@ -3,11 +3,17 @@
 
 <div class="container">
   <h1>Welcome to the Rusty HTMX Shop!</h1>
-  <nav><a href="/shop">Shop</a></nav>
-
+  <nav>
+    <div class="xt-row xt-row-px h-12 px-2 bg-gray-100">
+      <div class="w-11/12 self-center	">
+        <a href="/shop">Shop</a>
+      </div>
+      <div class="w-1/12 self-center text-right">
+        <a href="/shop">Cart (<span id="cart-count">{{ cart_count }}</span>)</a>
+      </div>
+    </div>
+  </nav>
   <h3>Shop The Book!</h3>
-
-
   <div>
     <div class="listing py-10">
       <div class="container">
@@ -21,7 +27,7 @@
               </div>
               <div class="py-4">
                 <div class="xt-h6">{{ product.display }}</div>
-                <div class="-mt-2 text-sm font-medium">{{ product.price }}</div>
+                <div class="-mt-2 text-sm font-medium">{{ product.price | price }}</div>
               </div>
               <div class="flex justify-center">
                 <button 
