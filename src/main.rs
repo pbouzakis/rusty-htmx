@@ -13,6 +13,7 @@ mod shop;
 
 static ENV: Lazy<Environment<'static>> = Lazy::new(|| {
     let mut env = Environment::new();
+    env.add_filter("price", display_price);
     env.set_loader(path_loader("templates"));
     env
 });
@@ -92,7 +93,10 @@ async fn about() -> Html<String> {
 async fn shop() -> Html<String> {
     let tmpl = ENV.get_template("shop.html").unwrap();
     let catalog = fetch_catalog();
-    let ctx = context!(catalog => catalog);
+    let ctx = context!(
+        catalog => catalog,
+        cart_count => 0,
+    );
     let r = tmpl.render(ctx).unwrap(); 
     Html(r)   
 }
@@ -107,7 +111,10 @@ async fn add_to_cart() -> Html<String> {
     let count = unsafe { 
         update_cart()
     };
-    let response = format!("<div>Added! Cart count: {}</div>", count);
+    let response = format!(
+        "<div>Added!</div><span id=\"cart-count\" hx-swap-oob=\"true\">{}</span>", 
+        count
+    );
     Html(response)
 }
 
@@ -120,4 +127,8 @@ async fn styled() -> Html<String> {
 
 async fn get_info() -> Html<&'static str> {
     Html("<div><img src=\"https://files.adrianistan.eu/htmx2.jpg\" /></div>")
+}
+
+fn display_price(price: f32) -> String {
+    format!("${:.2}", price)
 }
