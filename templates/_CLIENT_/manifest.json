@@ -8,11 +8,11 @@
     "src": "layout.html",
     "isEntry": true,
     "css": [
-      "assets/layout.8aa3b765.css"
+      "assets/layout.eb894560.css"
     ]
   },
   "layout.css": {
-    "file": "assets/layout.8aa3b765.css",
+    "file": "assets/layout.eb894560.css",
     "src": "layout.css"
   }
 }

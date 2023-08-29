@@ -1,0 +1,25 @@
+{% extends "_CLIENT_/layout.html" %}
+{% block body %}
+
+<div class="container">
+  <h1>Welcome to the Rusty HTMX Shop!</h1>
+  <nav><a href="/shop">Shop</a></nav>
+
+  <h3>Shop The Book!</h3>
+
+  <section id="catalog">
+    {% for product in catalog %}
+    <div style="float: left; width: 200px;">
+      <img style="height: 200px" src="{{ product.image_src }}" />
+      <div>{{ product.display }}</div>
+      <button
+        class="xt-button py-2.5 px-3.5 text-sm rounded-md font-medium leading-snug tracking-wider uppercase text-gray-900 bg-gray-100 transition hover:bg-gray-200 active:bg-gray-300 on:bg-gray-200 group"
+        onclick="alert('Coming Soon!')"
+        >
+        Add to Cart
+      </button>
+    </div>
+    {% endfor %}
+  </ul>  
+</div>
+{% endblock %}
