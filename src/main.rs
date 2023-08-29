@@ -7,6 +7,9 @@ use minijinja::{path_loader, context, Environment};
 use once_cell::sync::Lazy;
 use serde::Serialize;
 use tower_http::services::ServeDir;
+use shop::fetch_catalog;
+
+mod shop;
 
 static ENV: Lazy<Environment<'static>> = Lazy::new(|| {
     let mut env = Environment::new();
@@ -25,14 +28,19 @@ async fn main() {
     // build our application with a single route
     let app = Router::new()
         .nest_service("/assets", ServeDir::new("templates/_CLIENT_/assets"))
+        .nest_service("/images", ServeDir::new("client/images"))
         .route(
             "/",
             get(home),
         )
         .route(
-          "/styled",
-          get(styled),
+            "/styled",
+            get(styled),
         )
+        .route(
+            "/shop",
+            get(shop),
+        )        
         .route(
             "/about",
             get(about),
@@ -75,6 +83,14 @@ async fn about() -> Html<String> {
     let ctx = context!(name => "About");
     let r = tmpl.render(ctx).unwrap();
     Html(r)
+}
+
+async fn shop() -> Html<String> {
+    let tmpl = ENV.get_template("shop.html").unwrap();
+    let catalog = fetch_catalog();
+    let ctx = context!(catalog => catalog);
+    let r = tmpl.render(ctx).unwrap(); 
+    Html(r)   
 }
 
 async fn styled() -> Html<String> {
