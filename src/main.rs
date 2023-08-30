@@ -7,6 +7,7 @@ use minijinja::{path_loader, context, Environment};
 use once_cell::sync::Lazy;
 use serde::Serialize;
 use tower_http::services::ServeDir;
+use tower_livereload::{LiveReloadLayer, predicate::Predicate};
 use shop::fetch_catalog;
 
 mod shop;
@@ -22,6 +23,17 @@ static ENV: Lazy<Environment<'static>> = Lazy::new(|| {
 struct Link {
     display: String,
     href: String,
+}
+
+// Do not support livereload on htmx requests
+// This prevents browser from crashing due to too many livereload event listeners on the page.
+#[derive(Copy, Clone, Debug)]
+pub struct DoNotReloadOnPartialHtmls;
+
+impl<T> Predicate<http::Request<T>> for DoNotReloadOnPartialHtmls {
+    fn check(&mut self, request: &http::Request<T>) -> bool {
+        !request.headers().contains_key("Hx-Request")
+    }
 }
 
 #[tokio::main]
@@ -59,7 +71,10 @@ async fn main() {
         );
 
     #[cfg(debug_assertions)]
-    let app = app.layer(tower_livereload::LiveReloadLayer::new());        
+    let app = app.layer(
+        LiveReloadLayer::new()
+            .request_predicate::<axum::body::Body, DoNotReloadOnPartialHtmls>(DoNotReloadOnPartialHtmls)
+    );        
 
     // run it with hyper
     axum::Server::bind(&"127.0.0.1:3000".parse().unwrap())

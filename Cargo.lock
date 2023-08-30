@@ -505,6 +505,7 @@ name = "rusty-htmx"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "http",
  "minijinja",
  "once_cell",
  "serde",
