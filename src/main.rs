@@ -3,15 +3,18 @@ use axum::{
     response::{Html, Response},
     routing::{get, post},
     Router,
-    http::{Method, Uri},
+    http::{Method, Uri}, extract::{State, Form},
 };
 use minijinja::{path_loader, context, Environment};
 use once_cell::sync::Lazy;
+use std::sync::{Arc, Mutex};
+use serde::Deserialize;
 use tower_http::services::ServeDir;
 use tower_livereload::{LiveReloadLayer, predicate::Predicate};
 use uuid::Uuid;
-use shop::fetch_catalog;
+use shop::{fetch_catalog, Product};
 use log::log_request;
+
 
 mod shop;
 mod log;
@@ -33,6 +36,40 @@ impl<T> Predicate<http::Request<T>> for DoNotReloadOnPartialHtmls {
         !request.headers().contains_key("Hx-Request")
     }
 }
+
+struct Cart {
+    items: Vec<String>,
+}
+
+#[derive(Clone)]
+struct SessionController {
+    cart: Arc<Mutex<Cart>>,
+}
+
+impl SessionController {
+    fn new() -> Self {
+        Self { 
+            cart: Arc::new(
+                Mutex::new(Cart {
+                    items: vec![],
+                })
+            )
+         }
+    }
+    fn cart_count(&self) -> usize {
+        let cart = self.cart.lock().unwrap();
+        cart.items.len()
+    }
+    fn update_cart(&self, sku: String) -> usize {
+        let mut cart = self.cart.lock().unwrap();
+
+        cart.items.push(sku);
+
+        println!("{:#?}", cart.items);
+
+        cart.items.len()
+    }
+}   
 
 #[tokio::main]
 async fn main() {
@@ -59,9 +96,11 @@ async fn main() {
             "/about",
             get(about),
         )
+        .with_state(SessionController::new())
         .layer(
             middleware::map_response(mw_response)
         );
+
 
     #[cfg(debug_assertions)]
     let app = app.layer(
@@ -93,44 +132,49 @@ async fn mw_response(
     res
 }
 
-async fn home() -> Html<String> {
+async fn home(State(session): State<SessionController>) -> Html<String> {
     let tmpl = ENV.get_template("home.html").unwrap();
-    let ctx = context!();    
+    let ctx = context!(cart_count => session.cart_count());
     let r = tmpl.render(ctx).unwrap();
     Html(r)
 }
 
-async fn about() -> Html<String> {
+async fn about(State(session): State<SessionController>) -> Html<String> {
     let tmpl = ENV.get_template("about.html").unwrap();
-    let ctx = context!(name => "About");
+    let ctx = context!(cart_count => session.cart_count());
+
     let r = tmpl.render(ctx).unwrap();
     Html(r)
 }
 
-async fn shop() -> Html<String> {
+async fn shop(State(session): State<SessionController>) -> Html<String> {
     let tmpl = ENV.get_template("shop.html").unwrap();
     let catalog = fetch_catalog();
+
     let ctx = context!(
         catalog => catalog,
-        cart_count => 0,
+        cart_count => session.cart_count(),
     );
     let r = tmpl.render(ctx).unwrap(); 
     Html(r)   
 }
 
-static mut COUNT: i32 = 0;
-unsafe fn update_cart() -> &'static i32 {
-    COUNT += 1;
-    &COUNT
+#[derive(Deserialize)]
+struct AddToCartParams {
+    sku: String,
 }
 
-async fn add_to_cart() -> Html<String> {
-    let count = unsafe { 
-        update_cart()
-    };
+async fn add_to_cart(
+    State(session): State<SessionController>,
+    Form(params): Form<AddToCartParams>, 
+) -> Html<String> {
+    println!("Adding sku:{}", params.sku);
+
+    let cart_count = session.update_cart(params.sku);
+
     let response = format!(
         "<div>Added!</div><span id=\"cart-count\" hx-swap-oob=\"true\">{}</span>", 
-        count
+        cart_count
     );
     Html(response)
 }
