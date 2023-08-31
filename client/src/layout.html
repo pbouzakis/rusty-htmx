@@ -10,10 +10,24 @@
   <script src="https://unpkg.com/htmx.org@1.9.5" integrity="sha384-xcuj3WpfgjlKF+FXhSQFQ0ZNr39ln+hwjN3npfM9VBnUskLolQAcN80McRIVOPuO" crossorigin="anonymous"></script>
 </head>
 <body class="xt-body xt-links-default" data-client-template="true">
-  {% block body %}{% endblock %}
+  <div class="container">
+    <h1><a class="appearance-none" href="/">Rusty HTMX!</a></h1>
+    <nav>
+      <div class="xt-row xt-row-px h-12 px-2 bg-gray-100">
+        <div class="w-11/12 self-center	">
+          <a href="/">Home</a>
+          <a href="/shop">Shop</a>
+          <a href="/about">About</a>
+        </div>
+        <div class="w-1/12 self-center text-right">
+          <a href="/shop">Cart (<span id="cart-count">{{ cart_count }}</span>)</a>
+        </div>
+      </div>
+    </nav>
+    {% block body %}{% endblock %}
+  </div>
 
   <script type="module" src="/app.js"></script>
-
   <script>
     // put at the end of body tag https://browser-update.org/
     var $buoop = {required:{e:79,f:53,o:44,s:11,c:57},api:2021.03 };

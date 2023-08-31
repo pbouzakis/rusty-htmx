@@ -24,12 +24,6 @@ static ENV: Lazy<Environment<'static>> = Lazy::new(|| {
     env
 });
 
-#[derive(Debug, Serialize)]
-struct Link {
-    display: String,
-    href: String,
-}
-
 // Do not support livereload on htmx requests
 // This prevents browser from crashing due to too many livereload event listeners on the page.
 #[derive(Copy, Clone, Debug)]
@@ -49,14 +43,10 @@ async fn main() {
 
     let app = Router::new()
         .nest_service("/assets", ServeDir::new("templates/_CLIENT_/assets"))
-        .nest_service("/images", ServeDir::new("client/images"))
+        .nest_service("/media", ServeDir::new("client/media"))
         .route(
             "/",
             get(home),
-        )
-        .route(
-            "/styled",
-            get(styled),
         )
         .route(
             "/shop",
@@ -69,10 +59,6 @@ async fn main() {
         .route(
             "/about",
             get(about),
-        )
-        .route(
-            "/info",
-            get(get_info),
         )
         .layer(
             middleware::map_response(mw_response)
@@ -109,19 +95,8 @@ async fn mw_response(
 }
 
 async fn home() -> Html<String> {
-    let hp_links = vec![
-        Link {
-            display: "Rust".into(),
-            href: "https://doc.rust-lang.org/book/".into(),
-        },
-        Link {
-            display: "Htmx".into(),
-            href: "https://htmx.org/".into(),
-        },
-    ];
-
     let tmpl = ENV.get_template("home.html").unwrap();
-    let ctx = context!(name => "Home", links => hp_links);    
+    let ctx = context!();    
     let r = tmpl.render(ctx).unwrap();
     Html(r)
 }
@@ -159,17 +134,6 @@ async fn add_to_cart() -> Html<String> {
         count
     );
     Html(response)
-}
-
-async fn styled() -> Html<String> {
-    let tmpl = ENV.get_template("styled.html").unwrap();
-    let ctx = context!();
-    let r = tmpl.render(ctx).unwrap();
-    Html(r)
-}
-
-async fn get_info() -> Html<&'static str> {
-    Html("<div><img src=\"https://files.adrianistan.eu/htmx2.jpg\" /></div>")
 }
 
 fn display_price(price: f32) -> String {

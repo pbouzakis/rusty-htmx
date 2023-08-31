@@ -1,49 +1,36 @@
 {% extends "_CLIENT_/layout.html" %}
 {% block body %}
 
-<div class="container">
-  <h1>Welcome to the Rusty HTMX Shop!</h1>
-  <nav>
-    <div class="xt-row xt-row-px h-12 px-2 bg-gray-100">
-      <div class="w-11/12 self-center	">
-        <a href="/shop">Shop</a>
-      </div>
-      <div class="w-1/12 self-center text-right">
-        <a href="/shop">Cart (<span id="cart-count">{{ cart_count }}</span>)</a>
-      </div>
-    </div>
-  </nav>
-  <h3>Shop The Book!</h3>
-  <div>
-    <div class="listing py-10">
-      <div class="container">
-        <div class="xt-row xt-row-4">
-          
-          {% for product in catalog %}
-          <div class="w-6/12 md:w-4/12 lg:w-3/12">
-            <div class="listing-item mb-10">
-              <div class="xt-media-container bg-gray-200 pb-[75%]">
-                <img class="xt-media object-cover" src="{{ product.image_src }}" loading="lazy" alt="" />
-              </div>
-              <div class="py-4">
-                <div class="xt-h6">{{ product.display }}</div>
-                <div class="-mt-2 text-sm font-medium">{{ product.price | price }}</div>
-              </div>
-              <div class="flex justify-center">
-                <button 
-                  class="xt-button py-2.5 px-3.5 text-sm rounded-md font-medium leading-snug tracking-wider uppercase text-gray-900 bg-gray-100 transition hover:bg-gray-200 active:bg-gray-300 on:bg-gray-200 group"
-                  hx-post="/shop/cart"
-                  hx-vals='{"sku": "{{ product.slug }}"}'
-                  hx-target="next .msg"
-                >
-                  Add to Cart
-                </button>
-              </div>     
-              <div class="text-center msg"></div>     
+<h3>Shop The Book!</h3>
+<div>
+  <div class="listing py-10">
+    <div class="container">
+      <div class="xt-row xt-row-4">
+        
+        {% for product in catalog %}
+        <div class="w-6/12 md:w-4/12 lg:w-3/12">
+          <div class="listing-item mb-10">
+            <div class="xt-media-container bg-gray-200 pb-[75%]">
+              <img class="xt-media object-cover" src="{{ product.image_src }}" loading="lazy" alt="" />
             </div>
+            <div class="py-4">
+              <div class="xt-h6">{{ product.display }}</div>
+              <div class="-mt-2 text-sm font-medium">{{ product.price | price }}</div>
+            </div>
+            <div class="flex justify-center">
+              <button 
+                class="xt-button py-2.5 px-3.5 text-sm rounded-md font-medium leading-snug tracking-wider uppercase text-gray-900 bg-gray-100 transition hover:bg-gray-200 active:bg-gray-300 on:bg-gray-200 group"
+                hx-post="/shop/cart"
+                hx-vals='{"sku": "{{ product.slug }}"}'
+                hx-target="next .msg"
+              >
+                Add to Cart
+              </button>
+            </div>     
+            <div class="text-center msg"></div>     
           </div>
-          {% endfor %}
         </div>
+        {% endfor %}
       </div>
     </div>
   </div>

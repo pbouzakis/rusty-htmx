@@ -1,12 +1,11 @@
-{% extends "layout.html" %}
+{% extends "_CLIENT_/layout.html" %}
 {% block body %}
-  <h2>Page: {{ name }}</h2>
-  <p>This is the homepage. What an amazing site.</p>
-
-  <h3>Cool links!</h3>
-  <ul>
-    {% for link in links %}
-    <li><a href="{{ link.href }}">{{ link.display }}</a></li>
-    {% endfor %}
-  </ul>
+<div>
+  <div class="xt-media-container pb-[56.2%]">
+    <video class="xt-media" poster="/media/video.png" preload="metadata" muted playsinline loop autoplay>
+      <source type="video/mp4" src="/media/hp_video.mp4" />
+    </video>
+  </div>
+</div>
 {% endblock %}
+

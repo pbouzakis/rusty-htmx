@@ -1,14 +1,8 @@
-{% extends "layout.html" %}
+{% extends "_CLIENT_/layout.html" %}
 {% block body %}
-  <h2>Page: {{ name }}</h2>
-  <div id="content">
-    <button style="display: block; margin-top: 20px;"
-      hx-get="/info"
-      hx-trigger="click"
-      hx-target="#content"
-      hx-swap="outerHTML"
-    >
-        Click to learn more!
-    </button>
-  </div>  
+
+<h3>About Rusty Htmx</h3>
+<p>Proof of concept to demonstrate writing a hyper media driven web application written in Rust with Htmx.</p>
+
 {% endblock %}
+
