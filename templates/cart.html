@@ -1,0 +1,21 @@
+{% extends "_CLIENT_/layout.html" %}
+{% block body %}
+
+<h3>Cart</h3>
+
+{% if cart_items|length > 1 %}
+
+<ul>
+{% for item in cart_items %}
+    <li>{{item.product.display}}: -- Qty({{item.quantity}}) -- {{item.total|price}}</li>
+{% endfor %}
+</ul>
+
+{% else %}
+
+<p>Cart is empty!</p>
+
+{% endif %}
+
+{% endblock %}
+

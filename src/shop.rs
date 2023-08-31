@@ -2,10 +2,10 @@ use serde::Serialize;
 
 #[derive(Debug, Serialize)]
 pub struct Product {
-    slug: String,
-    display: String,
-    image_src: String,
-    price: f32,
+    pub slug: String,
+    pub display: String,
+    pub image_src: String,
+    pub price: f32,
 }
 
 pub fn fetch_catalog() -> Vec<Product> {
