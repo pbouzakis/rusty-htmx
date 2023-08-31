@@ -1,16 +1,23 @@
+use std::result::Result;
 use axum::{
-  response::Html, 
-  routing::{get, post},
-  Router,
+    middleware,
+    middleware::Next,
+    response::{Html, Response},
+    routing::{get, post},
+    Router,
+    http::Request,
 };
 use minijinja::{path_loader, context, Environment};
 use once_cell::sync::Lazy;
 use serde::Serialize;
 use tower_http::services::ServeDir;
 use tower_livereload::{LiveReloadLayer, predicate::Predicate};
+use uuid::Uuid;
 use shop::fetch_catalog;
+use log::log_request;
 
 mod shop;
+mod log;
 
 static ENV: Lazy<Environment<'static>> = Lazy::new(|| {
     let mut env = Environment::new();
@@ -68,6 +75,9 @@ async fn main() {
         .route(
             "/info",
             get(get_info),
+        )
+        .layer(
+            middleware::from_fn(mw_response)
         );
 
     #[cfg(debug_assertions)]
@@ -81,6 +91,21 @@ async fn main() {
         .serve(app.into_make_service())
         .await
         .unwrap();
+}
+
+async fn mw_response<B>(
+    req: Request<B>,
+    next: Next<B>,
+) -> Response {
+	println!("->> MIDDLEWARE:: mw_response");
+
+    log_request(
+        Uuid::new_v4(),
+        req.method(),
+        req.uri(),
+    );
+
+    next.run(req).await
 }
 
 async fn home() -> Html<String> {
