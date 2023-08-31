@@ -1,5 +1,5 @@
 use std::time::{SystemTime, UNIX_EPOCH};
-use http::{Method, Uri};
+use http::{Method, Uri, StatusCode};
 use serde_with::skip_serializing_none;
 use serde_json::json;
 use serde::Serialize;
@@ -7,8 +7,9 @@ use uuid::Uuid;
 
 pub fn log_request(
     uuid: Uuid,
-    req_method: &Method,
-    uri: &Uri,
+    req_method: Method,
+    uri: Uri,
+    status_code: StatusCode,
 ) -> () {
     let timestamp = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -21,6 +22,8 @@ pub fn log_request(
 
         req_path: uri.to_string(),
         req_method: req_method.to_string(),
+
+        status_code: status_code.to_string(),
     };
 
 	println!("   ->> log_request: \n{:#?}", json!(log_line));
@@ -35,6 +38,9 @@ struct RequestLogLine {
     // -- http request attributes
     req_path: String,
     req_method: String,
+
+    // -- http response attributes
+    status_code: String,
 
     // -- Errors and attributes
     // TODO!

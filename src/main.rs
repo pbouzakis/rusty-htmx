@@ -1,11 +1,9 @@
-use std::result::Result;
 use axum::{
     middleware,
-    middleware::Next,
     response::{Html, Response},
     routing::{get, post},
     Router,
-    http::Request,
+    http::{Method, Uri},
 };
 use minijinja::{path_loader, context, Environment};
 use once_cell::sync::Lazy;
@@ -77,7 +75,7 @@ async fn main() {
             get(get_info),
         )
         .layer(
-            middleware::from_fn(mw_response)
+            middleware::map_response(mw_response)
         );
 
     #[cfg(debug_assertions)]
@@ -93,19 +91,21 @@ async fn main() {
         .unwrap();
 }
 
-async fn mw_response<B>(
-    req: Request<B>,
-    next: Next<B>,
+async fn mw_response(
+    uri: Uri,
+    req_method: Method,
+    res: Response,
 ) -> Response {
 	println!("->> MIDDLEWARE:: mw_response");
-
+    
     log_request(
         Uuid::new_v4(),
-        req.method(),
-        req.uri(),
+        req_method,
+        uri,
+        res.status(),
     );
 
-    next.run(req).await
+    res
 }
 
 async fn home() -> Html<String> {
