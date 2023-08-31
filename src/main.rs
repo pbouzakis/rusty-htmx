@@ -7,7 +7,6 @@ use axum::{
 };
 use minijinja::{path_loader, context, Environment};
 use once_cell::sync::Lazy;
-use serde::Serialize;
 use tower_http::services::ServeDir;
 use tower_livereload::{LiveReloadLayer, predicate::Predicate};
 use uuid::Uuid;
