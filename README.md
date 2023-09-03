@@ -17,7 +17,9 @@ A proof of concept web server to explore the following
 Port of Python's jinja.
 
 #### Future spikes
+* Aksama
 * There is a jsx template engine?
+* Maud
 * Tera (also jinja inspired)
 
 ## Web Framework
@@ -26,8 +28,12 @@ Defaulting to axum as it is the current library being used in the production app
 ### Axum
 axum is designed to work with tokio and hyper. Runtime and transport layer independence is not a goal, at least for the time being.
 
-### Frontend Framworks
-Originially designed for the frontend, however, with the foundation of this POC based on htmx, do we need this? (If this was a JS app, would we still need react?)
+### Frontend Frameworks
+
+#### CSS libraries
+- TailwindCSS
+- XtendUI
+- Flowbite
 
 #### Future spikes
 * Leptos (specifically Leptos SSR)
