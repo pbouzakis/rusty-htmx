@@ -5,6 +5,9 @@ import './app.css'
 import 'xtendui'
 import 'xtendui/src/toggle'
 
-/* custom */
+/* flowbite */
+import { initFlowbite } from 'flowbite'
+window.initFlowbite = initFlowbite;
 
+/* custom */
 import './_common'

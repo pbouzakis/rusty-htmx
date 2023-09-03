@@ -1,10 +1,12 @@
 use axum::{
     middleware,
-    response::{Html, Response},
+    response::{Html, Response, IntoResponse},
     routing::{get, post},
     Router,
-    http::{Method, Uri}, extract::{State, Form},
+    http::{Method, Uri, HeaderMap}, 
+    extract::{State, Form},
 };
+use http::HeaderValue;
 use minijinja::{path_loader, context, Environment};
 use once_cell::sync::Lazy;
 use std::sync::{Arc, Mutex};
@@ -179,12 +181,16 @@ async fn about(State(session): State<SessionController>) -> Html<String> {
     Html(r)
 }
 
-async fn view_cart(State(session): State<SessionController>) -> Html<String> {
+async fn view_cart(State(session): State<SessionController>, headers: HeaderMap) -> Html<String> {
     let tmpl = ENV.get_template("cart.html").unwrap();
     
+    // Temp to show loading
+    std::thread::sleep(std::time::Duration::from_millis(1000));
+
     let ctx = context!(
         cart_items => session.cart_items(),
         cart_count => session.cart_count(),
+        partial => headers.contains_key("Hx-Request"),
     );
 
     let r = tmpl.render(ctx).unwrap(); 
@@ -200,7 +206,7 @@ async fn shop(State(session): State<SessionController>) -> Html<String> {
         cart_count => session.cart_count(),
     );
 
-    let r = tmpl.render(ctx).unwrap(); 
+    let r: String = tmpl.render(ctx).unwrap(); 
     Html(r)   
 }
 
@@ -212,17 +218,21 @@ struct AddToCartParams {
 async fn add_to_cart(
     State(session): State<SessionController>,
     Form(params): Form<AddToCartParams>, 
-) -> Html<String> {
+) -> impl IntoResponse {
     println!("Adding sku:{}", params.sku);
 
-    let cart_count = session.update_cart(params.sku);
+    let tmpl = ENV.get_template("cart-updated.html").unwrap();
+    let updated_cart_count = session.update_cart(params.sku);
 
-    let response = format!(
-        "<div>Added!</div><span id=\"cart-count\" hx-swap-oob=\"true\">{}</span>", 
-        cart_count
+    let mut headers = HeaderMap::new();
+    headers.insert("HX-Trigger", HeaderValue::from_str("cart-updated").unwrap());
+
+    let ctx = context!(
+        updated_cart_count => updated_cart_count,
     );
 
-    Html(response)
+    let r: String = tmpl.render(ctx).unwrap(); 
+    (headers, Html(r))
 }
 
 fn display_price(price: f32) -> String {

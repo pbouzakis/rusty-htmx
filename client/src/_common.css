@@ -3,3 +3,22 @@
 body {
   @apply py-10;
 }
+
+.cart-count-0 {
+  display: none !important;
+}
+
+#btn-cart {
+  width: 60px;
+}
+
+.htmx-indicator{
+  opacity:0;
+  transition: opacity 500ms ease-in;
+}
+.htmx-request .htmx-indicator{
+  opacity:1
+}
+.htmx-request.htmx-indicator{
+  opacity:1
+}
