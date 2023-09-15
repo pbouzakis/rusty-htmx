@@ -1,12 +1,10 @@
 use axum::{
     middleware,
-    response::{Html, Response},
-    routing::get,
+    response::Response,
     Router,
-    http::{Method, Uri}, 
-    extract::State,
+    http::{Method, Uri},
 };
-use minijinja::{path_loader, context, Environment};
+use minijinja::{path_loader, Environment};
 use once_cell::sync::Lazy;
 use tower_http::services::ServeDir;
 use tower_livereload::{LiveReloadLayer, predicate::Predicate};
@@ -14,6 +12,7 @@ use uuid::Uuid;
 use log::log_request;
 
 mod session;
+mod marketing;
 mod shop;
 mod log;
 
@@ -46,8 +45,7 @@ async fn main() {
     let app = Router::new()
         .nest_service("/assets", ServeDir::new("templates/_CLIENT_/assets"))
         .nest_service("/media", ServeDir::new("client/media"))
-        .route("/", get(home))
-        .route("/about", get(about))
+        .merge(marketing::routes())
         .merge(shop::web::routes())
         .with_state(SessionController::new())
         .layer(
@@ -82,21 +80,6 @@ async fn mw_response(
     );
 
     res
-}
-
-async fn home(State(session): State<SessionController>) -> Html<String> {
-    let tmpl = ENV.get_template("home.html").unwrap();
-    let ctx = context!(cart_count => session.cart_count());
-    let r = tmpl.render(ctx).unwrap();
-    Html(r)
-}
-
-async fn about(State(session): State<SessionController>) -> Html<String> {
-    let tmpl = ENV.get_template("about.html").unwrap();
-    let ctx = context!(cart_count => session.cart_count());
-
-    let r = tmpl.render(ctx).unwrap();
-    Html(r)
 }
 
 fn display_price(price: f32) -> String {
