@@ -1,26 +1,23 @@
 use axum::{
     middleware,
-    response::{Html, Response, IntoResponse},
-    routing::{get, post},
+    response::{Html, Response},
+    routing::get,
     Router,
-    http::{Method, Uri, HeaderMap}, 
-    extract::{State, Form},
+    http::{Method, Uri}, 
+    extract::State,
 };
-use http::HeaderValue;
 use minijinja::{path_loader, context, Environment};
 use once_cell::sync::Lazy;
-use std::sync::{Arc, Mutex};
-use serde::Deserialize;
 use tower_http::services::ServeDir;
 use tower_livereload::{LiveReloadLayer, predicate::Predicate};
 use uuid::Uuid;
 use log::log_request;
 
+mod session;
 mod shop;
 mod log;
 
-use shop::gateway;
-use shop::model::{Cart, CartItem};
+use session::SessionController;
 
 static ENV: Lazy<Environment<'static>> = Lazy::new(|| {
     let mut env = Environment::new();
@@ -38,58 +35,6 @@ impl<T> Predicate<http::Request<T>> for DoNotReloadOnPartialHtmls {
     fn check(&mut self, request: &http::Request<T>) -> bool {
         !request.headers().contains_key("Hx-Request")
     }
-}
-
-
-#[derive(Clone)]
-struct SessionController {
-    cart: Arc<Mutex<Cart>>,
-}
-
-impl SessionController {
-    fn new() -> Self {
-        Self { 
-            cart: Arc::new(
-                Mutex::new(Cart {
-                    items: vec![],
-                })
-            )
-         }
-    }
-    fn cart_count(&self) -> usize {
-        let cart = self.cart.lock().unwrap();
-        cart.items.len()
-    }
-    fn update_cart(&self, sku: String) -> usize {
-        let mut cart = self.cart.lock().unwrap();
-
-        cart.items.push(sku);
-
-        println!("{:#?}", cart.items);
-
-        cart.items.len()
-    }
-    fn cart_items(&self) -> Vec<CartItem> {
-        let catalog = gateway::fetch_catalog();
-        let cart = self.cart.lock().unwrap();
-        let mut items = vec![];
-
-        for product in catalog {
-            if cart.items.contains(&product.slug) {
-                let quantity = cart.items.iter().filter(|&slug| *slug == product.slug).count();
-                let total = product.price.clone() * quantity as f32;
-
-                items.push(
-                    CartItem {
-                        product,
-                        quantity,
-                        total,
-                    }
-                )
-            }
-        }
-        items
-    }
 }   
 
 #[tokio::main]
@@ -101,31 +46,13 @@ async fn main() {
     let app = Router::new()
         .nest_service("/assets", ServeDir::new("templates/_CLIENT_/assets"))
         .nest_service("/media", ServeDir::new("client/media"))
-        .route(
-            "/",
-            get(home),
-        )
-        .route(
-            "/cart", 
-            get(view_cart)
-        )
-        .route(
-            "/shop",
-            get(view_store),
-        )        
-        .route(
-            "/shop/cart",
-            post(add_to_cart),
-        )           
-        .route(
-            "/about",
-            get(about),
-        )
+        .route("/", get(home))
+        .route("/about", get(about))
+        .merge(shop::web::routes())
         .with_state(SessionController::new())
         .layer(
             middleware::map_response(mw_response)
         );
-
 
     #[cfg(debug_assertions)]
     let app = app.layer(
@@ -170,60 +97,6 @@ async fn about(State(session): State<SessionController>) -> Html<String> {
 
     let r = tmpl.render(ctx).unwrap();
     Html(r)
-}
-
-async fn view_cart(State(session): State<SessionController>, headers: HeaderMap) -> Html<String> {
-    let tmpl = ENV.get_template("cart.html").unwrap();
-    
-    // Temp to show loading
-    std::thread::sleep(std::time::Duration::from_millis(1000));
-
-    let ctx = context!(
-        cart_items => session.cart_items(),
-        cart_count => session.cart_count(),
-        partial => headers.contains_key("Hx-Request"),
-    );
-
-    let r = tmpl.render(ctx).unwrap(); 
-    Html(r)  
-}
-
-async fn view_store(State(session): State<SessionController>) -> Html<String> {
-    let tmpl = ENV.get_template("shop.html").unwrap();
-    let catalog = gateway::fetch_catalog();
-
-    let ctx = context!(
-        catalog => catalog,
-        cart_count => session.cart_count(),
-    );
-
-    let r: String = tmpl.render(ctx).unwrap(); 
-    Html(r)   
-}
-
-#[derive(Deserialize)]
-struct AddToCartParams {
-    sku: String,
-}
-
-async fn add_to_cart(
-    State(session): State<SessionController>,
-    Form(params): Form<AddToCartParams>, 
-) -> impl IntoResponse {
-    println!("Adding sku:{}", params.sku);
-
-    let tmpl = ENV.get_template("cart-updated.html").unwrap();
-    let updated_cart_count = session.update_cart(params.sku);
-
-    let mut headers = HeaderMap::new();
-    headers.insert("HX-Trigger", HeaderValue::from_str("cart-updated").unwrap());
-
-    let ctx = context!(
-        updated_cart_count => updated_cart_count,
-    );
-
-    let r: String = tmpl.render(ctx).unwrap(); 
-    (headers, Html(r))
 }
 
 fn display_price(price: f32) -> String {
