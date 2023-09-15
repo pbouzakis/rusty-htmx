@@ -17,6 +17,12 @@ pub struct ShoppingCart {
 }
 
 impl ShoppingCart {
+    pub fn new() -> Self {
+        Self {
+            items: Vec::new(),
+        }
+    }
+
     pub fn count(&self) -> usize {
         self.items.len()
     }
@@ -67,32 +73,20 @@ mod tests {
             slug: "test-slug".into(),
             display: "test display".into(),
             image_src: "https://image".into(),
-            price: 25.99,
-        }
-    }
-
-    fn new_dummy_cart_item() -> super::CartItem {
-        super::CartItem {
-            product: new_dummy_product(),
-            quantity: 1,
-            total: 25.99,
+            price: 25.00,
         }
     }
 
     #[test]
     fn empty_cart() {
-        let cart = super::ShoppingCart {
-            items: Vec::new(),
-        };
-
+        let cart = super::ShoppingCart::new();
+        
         assert_eq!(cart.count(), 0);
     }
     
     #[test]
     fn adding_to_cart_to_empty_cart() {
-        let mut cart = super::ShoppingCart {
-            items: Vec::new(),
-        };
+        let mut cart = super::ShoppingCart::new();
 
         cart.add(&new_dummy_product());
 
@@ -101,9 +95,8 @@ mod tests {
 
     #[test]
     fn adding_to_cart_to_non_empty_cart() {
-        let mut cart = super::ShoppingCart {
-            items: vec![new_dummy_cart_item()],
-        };
+        let mut cart = super::ShoppingCart::new();
+        cart.add(&new_dummy_product());
 
         let product = super::Product {
             slug: "test-slug-two".into(),
@@ -118,14 +111,13 @@ mod tests {
     }
 
     #[test]
-    fn adding_the_same_sku_twice_does_not_inc_count() {
-        let mut cart = super::ShoppingCart {
-            items: vec![new_dummy_cart_item()],
-        };
-
+    fn adding_the_same_sku_twice_does_not_add_new_item() {
+        let mut cart = super::ShoppingCart::new();
+        cart.add(&new_dummy_product());
         cart.add(&new_dummy_product());
 
         assert_eq!(cart.count(), 1, "Count should not increment");
         assert_eq!(cart.items()[0].quantity, 2, "Quantiy should increment");
+        assert_eq!(cart.items()[0].total, 50.00, "Total should be twice the price");
     }         
 }
