@@ -29,9 +29,11 @@ async fn view_cart(
     // Temp to show loading
     std::thread::sleep(std::time::Duration::from_millis(1000));
 
+    let cart = session.cart();
+
     let ctx = context!(
-        cart_items => session.cart_items(),
-        cart_count => session.cart_count(),
+        cart_items => cart.items(),
+        cart_count => cart.count(),
         partial => headers.contains_key("Hx-Request"),
     );
 
@@ -41,11 +43,12 @@ async fn view_cart(
 
 async fn view_store(State(session): State<SessionController>) -> Html<String> {
     let tmpl = ENV.get_template("shop.html").unwrap();
+    let cart = session.cart();
     let catalog = gateway::fetch_catalog();
 
     let ctx = context!(
         catalog => catalog,
-        cart_count => session.cart_count(),
+        cart_count => cart.count(),
     );
 
     let r: String = tmpl.render(ctx).unwrap(); 
@@ -64,13 +67,18 @@ async fn add_to_cart(
     println!("Adding sku:{}", params.sku);
 
     let tmpl = ENV.get_template("cart-updated.html").unwrap();
-    let updated_cart_count = session.update_cart(params.sku);
+    
+    let mut cart = session.cart();
+    let product = gateway::fetch_product_by_slug(&params.sku);
+    let count = cart.add(&product);
+
+    //let updated_cart_count = session.update_cart(params.sku);
 
     let mut headers = HeaderMap::new();
     headers.insert("HX-Trigger", HeaderValue::from_str("cart-updated").unwrap());
 
     let ctx = context!(
-        updated_cart_count => updated_cart_count,
+        updated_cart_count => count,
     );
 
     let r: String = tmpl.render(ctx).unwrap(); 

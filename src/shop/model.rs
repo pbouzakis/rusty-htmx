@@ -8,10 +8,6 @@ pub struct Product {
     pub price: f32,
 }
 
-pub struct Cart {
-    pub items: Vec<String>,
-}
-
 pub struct ShoppingCart {
     items: Vec<CartItem>,
 }
@@ -59,7 +55,7 @@ impl ShoppingCart {
 }
 
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct CartItem {
     pub product: Product,
     pub quantity: usize,

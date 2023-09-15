@@ -31,6 +31,14 @@ pub fn fetch_catalog() -> Vec<Product> {
             display: "Extreme Programming Explained".into(),
             image_src: "/media/covers/xp.png".into(),
             price: 20.00,
-        },        
+        },
     ]
+}
+
+pub fn fetch_product_by_slug(slug: &str) -> Product {
+    let catalog = fetch_catalog();
+    let product = catalog.iter().find(|p| p.slug == slug);
+
+    let product = product.unwrap();
+    product.clone()
 }
