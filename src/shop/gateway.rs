@@ -1,12 +1,4 @@
-use serde::Serialize;
-
-#[derive(Debug, Serialize)]
-pub struct Product {
-    pub slug: String,
-    pub display: String,
-    pub image_src: String,
-    pub price: f32,
-}
+use crate::shop::model::Product;
 
 pub fn fetch_catalog() -> Vec<Product> {
     vec![

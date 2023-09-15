@@ -10,16 +10,17 @@ use http::HeaderValue;
 use minijinja::{path_loader, context, Environment};
 use once_cell::sync::Lazy;
 use std::sync::{Arc, Mutex};
-use serde::{Serialize, Deserialize};
+use serde::Deserialize;
 use tower_http::services::ServeDir;
 use tower_livereload::{LiveReloadLayer, predicate::Predicate};
 use uuid::Uuid;
-use crate::shop::{fetch_catalog, Product};
 use log::log_request;
-
 
 mod shop;
 mod log;
+
+use shop::gateway;
+use shop::model::{Cart, CartItem};
 
 static ENV: Lazy<Environment<'static>> = Lazy::new(|| {
     let mut env = Environment::new();
@@ -39,16 +40,6 @@ impl<T> Predicate<http::Request<T>> for DoNotReloadOnPartialHtmls {
     }
 }
 
-struct Cart {
-    items: Vec<String>,
-}
-
-#[derive(Serialize)]
-struct CartItem {
-    product: Product,
-    quantity: usize,
-    total: f32,
-}
 
 #[derive(Clone)]
 struct SessionController {
@@ -79,7 +70,7 @@ impl SessionController {
         cart.items.len()
     }
     fn cart_items(&self) -> Vec<CartItem> {
-        let catalog = fetch_catalog();
+        let catalog = gateway::fetch_catalog();
         let cart = self.cart.lock().unwrap();
         let mut items = vec![];
 
@@ -120,7 +111,7 @@ async fn main() {
         )
         .route(
             "/shop",
-            get(shop),
+            get(view_store),
         )        
         .route(
             "/shop/cart",
@@ -197,9 +188,9 @@ async fn view_cart(State(session): State<SessionController>, headers: HeaderMap)
     Html(r)  
 }
 
-async fn shop(State(session): State<SessionController>) -> Html<String> {
+async fn view_store(State(session): State<SessionController>) -> Html<String> {
     let tmpl = ENV.get_template("shop.html").unwrap();
-    let catalog = fetch_catalog();
+    let catalog = gateway::fetch_catalog();
 
     let ctx = context!(
         catalog => catalog,
