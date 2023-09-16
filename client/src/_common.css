@@ -8,10 +8,6 @@ body {
   display: none !important;
 }
 
-#btn-cart {
-  width: 60px;
-}
-
 .htmx-indicator{
   opacity:0;
   transition: opacity 500ms ease-in;
