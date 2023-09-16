@@ -18,3 +18,13 @@ body {
 .htmx-request.htmx-indicator{
   opacity:1
 }
+
+/* My custom tailwind components */
+@layer components {
+  .pbo-primary-btn {
+    @apply text-center text-sm text-white font-medium rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800;
+  }
+  .pbo-secondary-btn {
+    @apply xt-button text-sm rounded-md font-medium leading-snug tracking-wider uppercase text-gray-900 bg-gray-100 transition hover:bg-gray-200 active:bg-gray-300 on:bg-gray-200;
+  }
+}
