@@ -34,11 +34,19 @@ async fn view_cart(
     let ctx = context!(
         cart_items => cart.items(),
         cart_count => cart.count(),
-        partial => headers.contains_key("Hx-Request"),
     );
 
-    let r = tmpl.render(ctx).unwrap(); 
-    Html(r)  
+    if headers.contains_key("Hx-Request") {
+        let r = tmpl
+            .eval_to_state(ctx).unwrap()
+            .render_block("body").unwrap(); 
+
+        Html(r)          
+
+    } else {
+        let r = tmpl.render(ctx).unwrap(); 
+        Html(r)  
+    }
 }
 
 async fn view_store(State(session): State<SessionController>) -> Html<String> {

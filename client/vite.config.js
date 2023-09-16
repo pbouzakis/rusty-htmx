@@ -5,11 +5,9 @@ export default {
   publicDir: './images',
   build: {
     manifest: true,
-     rollupOptions: {
-      // overwrite default .html entry
-      input: './src/layout.html',
+    rollupOptions: {
+      input: './src/index.html',
     },
-    //outDir: '../public',
     outDir: '../../templates/_CLIENT_',
     emptyOutDir: true,
   },
